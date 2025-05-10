@@ -31,12 +31,49 @@ HERE IS WHERE ARE SOME SNAPSHOT WHERE I RAN SOME COMANNDS LIKEE "CHMOD" AND ADD 
 
 
 
-2 ![](/Images/bucket%20created.png)
+#!/bin/bash
+
+# List of bucket names to create (for loop will go through them)
+BUCKET_NAMES=("emma-devops-bucket-1" "emma-devops-bucket-2")
+REGION="us-east-1"
+
+# Loop through the list of bucket names
+for BUCKET_NAME in "${BUCKET_NAMES[@]}"; do
+    echo "Checking if bucket '$BUCKET_NAME' exists..."
+
+    # Check if the bucket already exists
+    aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null
+
+    # Check the exit status of the previous command
+    if [ $? -eq 0 ]; then
+        echo "❗ Bucket '$BUCKET_NAME' already exists. Skipping creation."
+    else
+        echo "✅ Bucket '$BUCKET_NAME' does not exist. Creating..."
+
+        # Try to create the bucket
+        aws s3api create-bucket --bucket "$BUCKET_NAME" --region "$REGION" \
+        --create-bucket-configuration LocationConstraint="$REGION" 2>/dev/null
+
+        # Check if bucket creation was successful
+        if [ $? -eq 0 ]; then
+            echo "✅ Bucket '$BUCKET_NAME' created successfully."
+        else
+            echo "❌ Failed to create bucket '$BUCKET_NAME'. Please check permissions or naming."
+        fi
+    fi
+
+    echo "----------------------------"
+done
 
 
+![](./Images/Screen%20Shot%202025-05-10%20at%203.51.00%20PM.png)
 
-3 ![](./Images/file%20seen.png)
 
-
-4 .![](./Images/iam%20user%20.png)
-
+| Requirement                     | Met? | Explanation                                                  |
+| ------------------------------- | ---- | ------------------------------------------------------------ |
+| ✅ `if-else` control flow        | ✔️   | Used to check if a bucket exists and act accordingly         |
+| ✅ `for` loop                    | ✔️   | Iterates over a list of bucket names                         |
+| ✅ Error handling (`$?`)         | ✔️   | Checks command success/failure after each AWS CLI call       |
+| ✅ `aws s3api head-bucket` usage | ✔️   | Properly used to check if a bucket already exists            |
+| ✅ \Execution-ready script        | ✔️   | You can `chmod +x script.sh` and run it directly             |
+| ✅ Feedback to user              | ✔️   | Echo statements provide meaningful responses for each action |
